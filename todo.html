@@ -4,302 +4,353 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘 할 일 & 시간표</title>
-    <!-- Chart.js CDN (통계 그래프용) -->
+    <!-- Chart.js for statistics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Canvas Confetti CDN (100% 완료 축하 폭죽 효과) -->
+    <!-- Canvas Confetti for celebrate animation -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-color: #f3f4f6;
-            --container-bg: #ffffff;
-            --text-main: #111827;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
             --text-sub: #4b5563;
             --text-muted: #9ca3af;
             --border-color: #e5e7eb;
-            --input-border: #d1d5db;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --card-bg: #ffffff;
-            --card-hover: #f9fafb;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #eef2ff;
             --sub-bg: #f9fafb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --modal-overlay: rgba(0, 0, 0, 0.5);
         }
 
-        /* 다크 모드 변수 정의 */
         body.dark-mode {
             --bg-color: #0f172a;
-            --container-bg: #1e293b;
+            --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-sub: #cbd5e1;
             --text-muted: #64748b;
             --border-color: #334155;
-            --input-border: #475569;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --card-bg: #1e293b;
-            --card-hover: #334155;
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --primary-light: #1e1b4b;
             --sub-bg: #0f172a;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             transition: background-color 0.2s, color 0.2s, border-color 0.2s;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 12px;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 16px;
         }
 
-        /* 메인 컨테이너 */
         .container {
             width: 100%;
-            max-width: 580px;
-            background-color: var(--container-bg);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 520px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             padding: 24px;
-            margin-bottom: 16px;
-            position: relative;
+            margin-bottom: 24px;
         }
 
-        /* 헤더 & 다크모드 토글 버튼 */
+        /* Top Header */
         .top-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .header-date {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.05rem;
+            font-weight: 800;
             color: var(--text-main);
         }
 
         .theme-toggle-btn {
             background: var(--sub-bg);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
             color: var(--text-sub);
+            padding: 6px 12px;
+            border-radius: 20px;
             cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
-        /* 오늘의 다짐 / 동기부여 명언 배너 */
-        .quote-container {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(99, 102, 241, 0.15) 100%);
-            border: 1px solid rgba(79, 70, 229, 0.2);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 20px;
+        .theme-toggle-btn:hover {
+            color: var(--primary);
+        }
+
+        /* Auth Screen & User Profile */
+        .auth-bar {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: space-between;
+            background-color: var(--sub-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
 
-        .quote-content {
-            flex: 1;
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
         }
 
-        .quote-title {
-            font-size: 0.72rem;
+        .user-name {
+            font-size: 0.85rem;
             font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .quote-text {
-            font-size: 0.88rem;
-            font-weight: 600;
             color: var(--text-main);
-            line-height: 1.4;
-            word-break: break-word;
         }
 
-        .quote-edit-input {
-            width: 100%;
-            padding: 4px 8px;
-            border: 1px solid var(--primary);
-            border-radius: 6px;
-            font-size: 0.88rem;
-            background-color: var(--container-bg);
-            color: var(--text-main);
-            outline: none;
-        }
-
-        .quote-actions {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .quote-btn {
+        .logout-btn {
             background: none;
-            border: none;
-            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.78rem;
+            color: var(--text-sub);
             cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 4px;
         }
 
-        .quote-btn:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+        .logout-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .login-title {
+            font-size: 1.2rem;
+            font-weight: 800;
             color: var(--text-main);
         }
 
-        /* 100% 완료 축하 축하 모달 팝업 */
-        .congrats-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .congrats-modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .congrats-modal {
-            background-color: var(--container-bg);
-            padding: 28px 24px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 380px;
-            width: 90%;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-            transform: scale(0.8);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .congrats-modal-overlay.active .congrats-modal {
-            transform: scale(1);
-        }
-
-        .congrats-icon {
-            font-size: 3.5rem;
-            margin-bottom: 12px;
-            animation: bounce 1s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
-        }
-
-        .congrats-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .congrats-desc {
-            font-size: 0.95rem;
+        .login-desc {
+            font-size: 0.88rem;
             color: var(--text-sub);
-            margin-bottom: 20px;
+            line-height: 1.5;
+            max-width: 320px;
+        }
+
+        .google-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .google-login-btn:hover {
+            background-color: #f9fafb;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode .google-login-btn {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border-color: #475569;
+        }
+
+        .save-indicator {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-left: 6px;
+        }
+
+        .error-alert-box {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            margin-bottom: 16px;
+            word-break: break-all;
+            display: none;
             line-height: 1.5;
         }
 
-        .congrats-close-btn {
-            background-color: var(--primary);
-            color: #ffffff;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        body.dark-mode .error-alert-box {
+            background-color: #451a1a;
+            border-color: #7f1d1d;
+            color: #fca5a5;
         }
 
-        /* 탭 메인 메뉴 */
-        .tab-menu {
+        .domain-copy-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            background: rgba(0,0,0,0.05);
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+
+        .domain-copy-input {
+            flex: 1;
+            font-size: 0.75rem;
+            border: none;
+            background: transparent;
+            color: currentColor;
+            font-family: monospace;
+            outline: none;
+        }
+
+        .btn-copy-domain {
+            background-color: #991b1b;
+            color: #ffffff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        body.dark-mode .btn-copy-domain {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Quotes Box */
+        .quote-container {
+            background-color: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .quote-text {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            line-height: 1.4;
+            flex: 1;
+            word-break: keep-all;
+        }
+
+        .quote-edit-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-decoration: underline;
+            white-space: nowrap;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
             display: flex;
             background-color: var(--sub-bg);
-            border-radius: 10px;
             padding: 4px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            gap: 2px;
+            border: 1px solid var(--border-color);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 10px 0;
+            padding: 8px;
+            text-align: center;
             border: none;
             background: none;
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-sub);
             border-radius: 8px;
             cursor: pointer;
         }
 
         .tab-btn.active {
-            background-color: var(--container-bg);
+            background-color: var(--card-bg);
             color: var(--primary);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        /* 탭 콘텐츠 */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* 진행도 및 막대 그래프 */
-        .progress-section {
-            margin-bottom: 20px;
-        }
-
-        .progress-info {
+        /* Progress Area */
+        .progress-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
-            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .progress-title {
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--text-sub);
-            margin-bottom: 8px;
+        }
+
+        .progress-count {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--primary);
         }
 
         .progress-bar-bg {
             width: 100%;
             height: 10px;
-            background-color: var(--border-color);
+            background-color: var(--sub-bg);
             border-radius: 5px;
             overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
         }
 
         .progress-bar-fill {
@@ -307,33 +358,33 @@
             width: 0%;
             background-color: var(--primary);
             border-radius: 5px;
-            transition: width 0.4s ease;
+            transition: width 0.3s ease;
         }
 
-        /* 필터 및 툴바 */
-        .toolbar {
+        /* Controls / Filter Bar */
+        .controls-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
             gap: 8px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
-        .filter-group {
+        .filter-chips {
             display: flex;
             gap: 4px;
             overflow-x: auto;
-            padding-bottom: 2px;
+            padding-bottom: 4px;
         }
 
         .filter-chip {
             padding: 4px 10px;
-            border-radius: 14px;
-            font-size: 0.78rem;
-            font-weight: 600;
+            border-radius: 16px;
             border: 1px solid var(--border-color);
-            background-color: var(--sub-bg);
+            background: var(--sub-bg);
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--text-sub);
             cursor: pointer;
             white-space: nowrap;
@@ -345,86 +396,79 @@
             border-color: var(--primary);
         }
 
-        .toggle-all-btn {
-            background: none;
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-sub {
+            padding: 6px 10px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            background-color: var(--sub-bg);
             color: var(--text-sub);
+            font-size: 0.75rem;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        /* 입력 영역 Form */
-        .todo-form {
+        .btn-sub:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Input Form */
+        .input-form {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 20px;
-            background-color: var(--sub-bg);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
         }
 
-        .input-row {
+        .input-row-main {
             display: flex;
             gap: 8px;
         }
 
-        .todo-input, .select-input {
-            padding: 10px 12px;
-            border: 1.5px solid var(--input-border);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            outline: none;
-            background-color: var(--container-bg);
+        .input-row-sub {
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"], input[type="time"], input[type="date"], select {
+            background-color: var(--sub-bg);
+            border: 1px solid var(--border-color);
             color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            outline: none;
         }
 
-        .todo-input {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .todo-input:focus, .select-input:focus {
+        input[type="text"]:focus, select:focus, input[type="time"]:focus, input[type="date"]:focus {
             border-color: var(--primary);
         }
 
-        .add-btn {
-            padding: 10px 16px;
+        .todo-input-text {
+            flex: 1;
+        }
+
+        .btn-add {
             background-color: var(--primary);
             color: #ffffff;
             border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
             white-space: nowrap;
+            font-size: 0.88rem;
         }
 
-        .add-btn:hover {
+        .btn-add:hover {
             background-color: var(--primary-hover);
         }
 
-        .opt-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: flex-between;
-            flex-wrap: wrap;
-        }
-
-        .opt-label {
-            font-size: 0.78rem;
-            color: var(--text-sub);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* 할 일 목록 */
+        /* Todo Cards List */
         .todo-list {
             display: flex;
             flex-direction: column;
@@ -432,570 +476,716 @@
             margin-bottom: 20px;
         }
 
-        /* 할 일 카드 항목 */
-        .todo-item {
+        .todo-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: var(--card-bg);
+            background-color: var(--sub-bg);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
             padding: 12px 14px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            gap: 8px;
-        }
-
-        .todo-item.priority-high {
-            border-left: 4px solid #ef4444;
-        }
-
-        .todo-item:hover {
-            background-color: var(--card-hover);
+            border-radius: 12px;
+            gap: 10px;
         }
 
         .todo-left {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 10px;
             flex: 1;
             min-width: 0;
         }
 
-        /* 커스텀 체크박스 */
         .checkbox {
             width: 20px;
             height: 20px;
-            border: 2px solid var(--text-muted);
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
             flex-shrink: 0;
-            margin-top: 2px;
+            background-color: var(--card-bg);
         }
 
-        .todo-item.completed .checkbox {
+        .todo-card.completed .checkbox {
             background-color: var(--primary);
             border-color: var(--primary);
+            color: #ffffff;
         }
 
-        .checkbox::after {
-            content: '';
-            width: 5px;
-            height: 9px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-            display: none;
-            margin-bottom: 2px;
-        }
-
-        .todo-item.completed .checkbox::after {
-            display: block;
-        }
-
-        .todo-content-box {
+        .todo-content {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
             flex: 1;
             min-width: 0;
         }
 
-        .todo-text {
-            font-size: 0.95rem;
-            color: var(--text-main);
-            word-break: break-all;
-            cursor: pointer;
-            line-height: 1.3;
+        .todo-title-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .todo-item.completed .todo-text {
+        .todo-text {
+            font-size: 0.92rem;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .todo-card.completed .todo-text {
             text-decoration: line-through;
             color: var(--text-muted);
         }
 
-        .badge-group {
+        .priority-star {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .priority-star.active {
+            color: var(--warning);
+        }
+
+        .todo-meta {
             display: flex;
             gap: 6px;
             align-items: center;
-            flex-wrap: wrap;
+            font-size: 0.72rem;
+            margin-top: 2px;
         }
 
-        .tag-badge {
-            font-size: 0.7rem;
+        .category-tag {
+            padding: 1px 6px;
+            border-radius: 4px;
             font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background-color: var(--sub-bg);
-            color: var(--text-sub);
-            border: 1px solid var(--border-color);
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
         }
 
-        .dday-badge {
-            font-size: 0.7rem;
+        .dday-tag {
+            padding: 1px 6px;
+            border-radius: 4px;
             font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background-color: #e0e7ff;
-            color: #4338ca;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
         }
 
-        .dday-badge.urgent {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        .dday-badge.passed {
-            background-color: var(--sub-bg);
-            color: var(--text-muted);
-        }
-
-        /* 중요도 별 버튼 */
-        .star-btn {
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0 4px;
-        }
-
-        .star-btn.active {
-            color: #f59e0b;
-        }
-
-        /* 액션 버튼 그룹 */
-        .item-actions {
+        .todo-actions {
             display: flex;
             align-items: center;
-            gap: 2px;
-            flex-shrink: 0;
+            gap: 4px;
         }
 
-        .icon-btn {
+        .btn-card-action {
             background: none;
             border: none;
             color: var(--text-muted);
+            cursor: pointer;
             font-size: 0.8rem;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 4px;
+            padding: 4px;
         }
 
-        .icon-btn:hover {
-            background-color: var(--sub-bg);
-            color: var(--text-main);
+        .btn-card-action:hover {
+            color: var(--danger);
         }
 
-        .icon-btn.delete-btn:hover {
-            color: #ef4444;
-            background-color: #fee2e2;
-        }
-
-        .edit-input {
-            width: 100%;
-            padding: 4px 8px;
-            border: 1px solid var(--primary);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            outline: none;
-            background-color: var(--container-bg);
-            color: var(--text-main);
-        }
-
-        .empty-message {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 32px 0;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .action-area {
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .clear-btn {
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 6px;
-        }
-
-        /* 시간표 및 통계 영역 */
-        .timetable-form {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-            background-color: var(--sub-bg);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .time-inputs {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .time-select {
-            padding: 8px;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            outline: none;
-            flex: 1;
-            background-color: var(--container-bg);
-            color: var(--text-main);
-        }
-
+        /* Timetable Tab */
         .timetable-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .timetable-item {
+        .timetable-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 14px;
-            background-color: var(--card-bg);
+            background-color: var(--sub-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            padding: 12px 14px;
+            border-radius: 12px;
             border-left: 4px solid var(--primary);
         }
 
-        .time-range {
+        .timetable-card.active-now {
+            border-left-color: var(--success);
+            background-color: var(--primary-light);
+        }
+
+        .timetable-time {
             font-size: 0.8rem;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 2px;
         }
 
-        .subject-name {
-            font-size: 0.95rem;
-            font-weight: 600;
+        .timetable-subject {
+            font-size: 0.9rem;
+            font-weight: 700;
             color: var(--text-main);
         }
 
-        /* 통계 차트 스티머 및 컨테이너 */
+        /* Empty Messages */
+        .empty-message {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        /* Tab Content Display */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Tab */
         .stats-summary {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
         }
 
         .stat-card {
             background-color: var(--sub-bg);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
             padding: 12px;
+            border-radius: 12px;
             text-align: center;
         }
 
         .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 800;
             color: var(--primary);
-            margin-top: 4px;
         }
 
         .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-sub);
+            margin-top: 2px;
         }
 
         .chart-wrapper {
-            position: relative;
-            width: 100%;
-            height: 240px;
-            margin-top: 10px;
+            background-color: var(--sub-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
         }
 
-        .storage-notice {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+        /* Footer Notice */
+        .footer-notice {
+            margin-top: 20px;
+            font-size: 0.75rem;
             text-align: center;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--modal-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 360px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .modal-desc {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-btn {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 상단 헤더 (오늘 날짜 + 테마 변경 버튼) -->
+        <!-- Top Date & Mode Toggle Bar -->
         <div class="top-header">
-            <div class="header-date" id="currentDate"></div>
-            <button class="theme-toggle-btn" onclick="toggleDarkMode()" id="themeBtn">
-                🌙 다크모드
+            <div class="header-date" id="headerDate">2026년 10월 24일 토요일</div>
+            <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleDarkMode()">
+                <span id="themeIcon">🌙</span> <span id="themeText">다크모드</span>
             </button>
         </div>
 
-        <!-- 오늘의 다짐 / 동기부여 명언 영역 -->
-        <div class="quote-container">
-            <div class="quote-content">
-                <div class="quote-title">💡 오늘의 한마디 & 다짐</div>
-                <div id="quoteDisplayBox">
-                    <span class="quote-text" id="quoteText">오늘 할 일을 미루지 말고 차근차근 완성해 보세요!</span>
-                </div>
-            </div>
-            <div class="quote-actions">
-                <button class="quote-btn" onclick="getRandomQuote()" title="새로운 명언 불러오기">🔄</button>
-                <button class="quote-btn" onclick="toggleEditQuote()" id="quoteEditBtn" title="직접 작성하기">✏️</button>
-            </div>
+        <!-- Auth & User Info Bar -->
+        <div id="authContainer">
+            <!-- Dynamic Injection via JavaScript -->
         </div>
 
-        <!-- 탭 메뉴 -->
-        <div class="tab-menu">
-            <button class="tab-btn active" onclick="switchTab('todo')">할 일 목록</button>
-            <button class="tab-btn" onclick="switchTab('timetable')">오늘의 시간표</button>
-            <button class="tab-btn" onclick="switchTab('stats')">달성 통계</button>
-        </div>
+        <!-- Error Alert Box -->
+        <div class="error-alert-box" id="errorAlertBox"></div>
 
-        <!-- 1. 할 일 목록 탭 -->
-        <div id="todoTab" class="tab-content active">
-            <!-- 달성률 프로그레스 바 -->
-            <div class="progress-section">
-                <div class="progress-info">
-                    <span>오늘의 달성도</span>
-                    <span id="progressCount">0 / 0 (0%)</span>
+        <!-- App Main Content Wrapper (Hidden until logged in or practice mode) -->
+        <div id="appMainContent">
+
+            <!-- Quotes Box -->
+            <div class="quote-container">
+                <div class="quote-text" id="quoteDisplay">"오늘 할 수 있는 일에 최선을 다하자!"</div>
+                <button class="quote-edit-btn" onclick="editQuote()">다짐 수정</button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" id="tabBtnTodo" onclick="switchTab('todo')">할 일 목록</button>
+                <button class="tab-btn" id="tabBtnSchedule" onclick="switchTab('schedule')">시간표</button>
+                <button class="tab-btn" id="tabBtnStats" onclick="switchTab('stats')">달성 통계</button>
+            </div>
+
+            <!-- Tab 1: Todo List -->
+            <div id="tabTodo" class="tab-content active">
+                <div class="progress-header">
+                    <span class="progress-title">오늘의 달성률</span>
+                    <span class="progress-count" id="progressCount">0 / 0 (0%)</span>
                 </div>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBar"></div>
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
                 </div>
-            </div>
 
-            <!-- 필터 및 툴바 -->
-            <div class="toolbar">
-                <div class="filter-group" id="filterGroup">
-                    <button class="filter-chip active" onclick="setCategoryFilter('ALL')">전체</button>
-                    <button class="filter-chip" onclick="setCategoryFilter('공부')">📚 공부</button>
-                    <button class="filter-chip" onclick="setCategoryFilter('운동')">🏋️ 운동</button>
-                    <button class="filter-chip" onclick="setCategoryFilter('업무')">💼 업무</button>
-                    <button class="filter-chip" onclick="setCategoryFilter('개인')">🏠 개인</button>
-                </div>
-                <button class="toggle-all-btn" id="toggleAllBtn" onclick="toggleAll()">전체 완료</button>
-            </div>
-
-            <!-- 입력 영역 (할 일 + 카테고리 + 디데이) -->
-            <div class="todo-form">
-                <div class="input-row">
-                    <input type="text" id="todoInput" class="todo-input" placeholder="오늘 할 일을 입력하세요" maxlength="100">
-                    <button id="addBtn" class="add-btn" onclick="addTodo()">추가</button>
-                </div>
-                <div class="opt-row">
-                    <label class="opt-label">
-                        카테고리:
-                        <select id="categoryInput" class="select-input" style="padding: 4px 8px; font-size: 0.8rem;">
+                <!-- Input Form -->
+                <div class="input-form">
+                    <div class="input-row-main">
+                        <input type="text" id="todoInput" class="todo-input-text" placeholder="오늘 할 일을 입력하세요..." onkeypress="handleTodoKeyPress(event)">
+                        <button class="btn-add" onclick="addTodo()">추가</button>
+                    </div>
+                    <div class="input-row-sub">
+                        <select id="todoCategorySelect" style="flex:1;">
                             <option value="공부">📚 공부</option>
-                            <option value="운동">🏋️ 운동</option>
+                            <option value="운동">🏃 운동</option>
                             <option value="업무">💼 업무</option>
-                            <option value="개인" selected>🏠 개인</option>
+                            <option value="개인" selected>👤 개인</option>
                         </select>
-                    </label>
-                    <label class="opt-label">
-                        디데이:
-                        <input type="date" id="ddayInput" class="select-input" style="padding: 4px 6px; font-size: 0.8rem;">
-                    </label>
+                        <input type="date" id="todoDdayInput" style="flex:1;">
+                    </div>
+                </div>
+
+                <!-- Filter and Action Buttons -->
+                <div class="controls-bar">
+                    <div class="filter-chips">
+                        <button class="filter-chip active" onclick="setFilter('전체', this)">전체</button>
+                        <button class="filter-chip" onclick="setFilter('공부', this)">📚 공부</button>
+                        <button class="filter-chip" onclick="setFilter('운동', this)">🏃 운동</button>
+                        <button class="filter-chip" onclick="setFilter('업무', this)">💼 업무</button>
+                        <button class="filter-chip" onclick="setFilter('개인', this)">👤 개인</button>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-sub" onclick="toggleSelectAll()">전체 완료 선택</button>
+                        <button class="btn-sub" onclick="clearCompleted()">완료 항목 삭제</button>
+                    </div>
+                </div>
+
+                <!-- Todo List Cards Container -->
+                <div class="todo-list" id="todoList">
+                    <!-- Dynamic rendering -->
                 </div>
             </div>
 
-            <!-- 할 일 목록 -->
-            <div id="todoList" class="todo-list"></div>
+            <!-- Tab 2: Timetable -->
+            <div id="tabSchedule" class="tab-content">
+                <div class="input-form">
+                    <div class="input-row-main">
+                        <input type="text" id="scheduleSubject" class="todo-input-text" placeholder="과목 또는 일정 이름..." onkeypress="handleScheduleKeyPress(event)">
+                        <button class="btn-add" onclick="addSchedule()">추가</button>
+                    </div>
+                    <div class="input-row-sub">
+                        <input type="time" id="scheduleStartTime" style="flex:1;">
+                        <span style="align-self: center; font-size: 0.8rem; color: var(--text-sub);">~</span>
+                        <input type="time" id="scheduleEndTime" style="flex:1;">
+                    </div>
+                </div>
 
-            <!-- 목록 비어있을 때 안내 -->
-            <div id="emptyMessage" class="empty-message">
-                등록된 할 일이 없습니다.<br>새로운 할 일을 추가해보세요!
+                <div class="timetable-list" id="timetableList">
+                    <!-- Dynamic rendering -->
+                </div>
             </div>
 
-            <div class="action-area">
-                <button id="clearCompletedBtn" class="clear-btn" onclick="clearCompleted()">완료한 것 치우기</button>
+            <!-- Tab 3: Statistics -->
+            <div id="tabStats" class="tab-content">
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTodayRate">0%</div>
+                        <div class="stat-label">오늘 달성률</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat7DaysAvg">0%</div>
+                        <div class="stat-label">7일 평균 달성률</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotalDone">0개</div>
+                        <div class="stat-label">누적 완료 항목</div>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
             </div>
+
+            <!-- Footer Notice -->
+            <div class="footer-notice" id="footerNotice">
+                내 할 일은 내 계정에만 저장되고 다른 사람은 볼 수 없습니다
+            </div>
+
+        </div> <!-- /#appMainContent -->
+
+    </div> <!-- /.container -->
+
+    <!-- Modal Box -->
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-box">
+            <div class="modal-title" id="modalTitle">🎉 축하합니다!</div>
+            <div class="modal-desc" id="modalDesc">오늘의 모든 목표를 달성했습니다!</div>
+            <button class="modal-btn" onclick="closeModal()">확인</button>
         </div>
+    </div>
 
-        <!-- 2. 시간표 탭 -->
-        <div id="timetableTab" class="tab-content">
-            <div class="timetable-form">
-                <div class="time-inputs">
-                    <input type="time" id="startTime" class="time-select" value="09:00">
-                    <span style="color: var(--text-sub);">~</span>
-                    <input type="time" id="endTime" class="time-select" value="10:00">
-                </div>
-                <div class="input-row">
-                    <input type="text" id="subjectInput" class="todo-input" placeholder="과목 또는 일정명을 입력하세요" maxlength="50">
-                    <button class="add-btn" onclick="addTimetableItem()">등록</button>
-                </div>
-            </div>
-
-            <div id="timetableList" class="timetable-list"></div>
-            <div id="emptyTimetableMessage" class="empty-message">
-                등록된 시간표가 없습니다.<br>시간별 일정을 추가해보세요!
-            </div>
-        </div>
-
-        <!-- 3. 달성 통계 탭 -->
-        <div id="statsTab" class="tab-content">
-            <div class="stats-summary">
-                <div class="stat-card">
-                    <div class="stat-label">오늘 완수률</div>
-                    <div class="stat-value" id="statTodayRate">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">7일 평균 달성률</div>
-                    <div class="stat-value" id="statWeeklyAvg">0%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">총 완료 항목</div>
-                    <div class="stat-value" id="statTotalCompleted">0개</div>
-                </div>
-            </div>
-
-            <h4 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main);">최근 7일 달성 추이</h4>
-            <div class="chart-wrapper">
-                <canvas id="weeklyChart"></canvas>
+    <!-- Edit Todo Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-box">
+            <div class="modal-title">할 일 수정</div>
+            <input type="text" id="editTodoInput" style="width: 100%; margin-bottom: 12px;">
+            <select id="editCategorySelect" style="width: 100%; margin-bottom: 16px;">
+                <option value="공부">📚 공부</option>
+                <option value="운동">🏃 운동</option>
+                <option value="업무">💼 업무</option>
+                <option value="개인">👤 개인</option>
+            </select>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-sub" style="flex: 1;" onclick="closeEditModal()">취소</button>
+                <button class="modal-btn" style="flex: 1;" onclick="saveEditTodo()">저장</button>
             </div>
         </div>
     </div>
 
-    <p class="storage-notice">이 목록은 현재 사용 중인 브라우저에 안전하게 자동 저장됩니다.</p>
+    <!-- Firebase Script Module -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <!-- 100% 완료 축하 축하 모달 팝업 -->
-    <div class="congrats-modal-overlay" id="congratsModal">
-        <div class="congrats-modal">
-            <div class="congrats-icon" id="congratsIcon">🎉🥳🎊</div>
-            <div class="congrats-title" id="congratsTitle">오늘의 목표 100% 달성!</div>
-            <div class="congrats-desc" id="congratsDesc">
-                축하합니다! 오늘 할 일을 모두 완수하셨습니다.<br>정말 멋진 하루를 보내고 계시는군요!
-            </div>
-            <button class="congrats-close-btn" onclick="closeCongratsModal()">최고예요!</button>
-        </div>
-    </div>
+        // Provided firebaseConfig
+        const firebaseConfig = {
+            apiKey: "AIzaSyDc-zXNAfaPRI0_bxxksGE20ju2uNNy8c0",
+            authDomain: "my-web-4afd7.firebaseapp.com",
+            projectId: "my-web-4afd7",
+            storageBucket: "my-web-4afd7.firebasestorage.app",
+            messagingSenderId: "953178650761",
+            appId: "1:953178650761:web:63c552f96ac63ee51fee58"
+        };
 
-    <script>
-        // Storage Keys
-        const STORAGE_KEY_TODOS = 'daily_todos_v3_data';
-        const STORAGE_KEY_TIMETABLE = 'daily_timetable_v3_data';
-        const STORAGE_KEY_HISTORY = 'daily_todos_history_v3';
-        const STORAGE_KEY_THEME = 'daily_theme_v3';
-        const STORAGE_KEY_QUOTE = 'daily_quote_v3';
+        // Environment Detection & App Identification
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // 동기부여 명언 데이터베이스
-        const defaultQuotes = [
-            "오늘 할 일을 미루지 않고 차근차근 완수해보세요!",
-            "작은 성취가 모여 위대한 결과를 만듭니다.",
-            "할 수 있다고 생각하면 반드시 해낼 수 있습니다.",
-            "오늘도 나 자신과의 약속을 지키는 멋진 하루!",
-            "시작이 반이다. 지금 바로 실행에 옮겨보세요.",
-            "매일 조금씩 성장하는 나를 응원합니다.",
-            "집중과 연속성이 성공의 열쇠입니다.",
-            "미래는 오늘 당신이 무엇을 하느냐에 따라 달려있습니다."
-        ];
+        let auth, db;
+        let isPracticeMode = false;
+        let currentUser = null;
 
-        // 100% 완료 축하 메시지 세트 (10가지)
-        const congratsMessages = [
-            {
-                icon: "🎉🥳🎊",
-                title: "오늘의 목표 100% 완벽 달성!",
-                desc: "축하합니다! 오늘 계획한 일을 하나도 빠짐없이 모두 완수하셨습니다.<br>정말 빛나는 성취입니다!"
-            },
-            {
-                icon: "🚀⭐🔥",
-                title: "한계를 뛰어넘은 최고의 하루!",
-                desc: "놀라운 집중력과 실행력이에요!<br>오늘 보여주신 열정이 당신을 더 멋진 내일로 이끌어 줄 것입니다."
-            },
-            {
-                icon: "👑🏆🏅",
-                title: "오늘의 갓생 왕 승인!",
-                desc: "오늘 할 일 도장 깨기 완판!<br>자신감 넘치는 멋진 하루를 완성하셨습니다. 스스로를 마음껏 칭찬해 주세요!"
-            },
-            {
-                icon: "🌈✨🎈",
-                title: "오늘 하루 수고 많으셨어요!",
-                desc: "작은 실천들이 모여 큰 성장의 기적을 만들어내고 있습니다.<br>기분 좋은 뿌듯함을 즐겨보세요!"
-            },
-            {
-                icon: "💪💯🌟",
-                title: "완벽한 목표 정복 달성!",
-                desc: "미루지 않고 끝까지 해낸 당신이 바로 오늘의 주인공입니다.<br>정말 자랑스러워요!"
-            },
-            {
-                icon: "☕🍰🍀",
-                title: "모든 임무 완수! 이제 꿀휴식 타임!",
-                desc: "할 일을 깔끔하게 끝마쳤으니,<br>이제 마음 편히 좋아하는 여유와 휴식을 즐기세요!"
-            },
-            {
-                icon: "🎆🎖️✨",
-                title: "미션 완수! 성취감 만점!",
-                desc: "스스로와의 약속을 지켜낸 훌륭한 하루입니다.<br>이 기세를 이어 내일도 기분 좋게 출발해 봐요!"
-            },
-            {
-                icon: "🦸‍♂️🦸‍♀️⚡",
-                title: "오늘 도파민 폭발하는 날!",
-                desc: "목표를 하나씩 지워나갈 때마다 느낀 그 쾌감!<br>성공 방정식의 맛을 제대로 보셨군요!"
-            },
-            {
-                icon: "🌸🍃💛",
-                title: "소중한 하루를 보람차게 결실!",
-                desc: "차곡차곡 쌓아 올린 오늘의 성실함이<br>곧 당신만의 엄청난 자산이 될 거예요."
-            },
-            {
-                icon: "👏🎁🤩",
-                title: "올 클리어! PERFECT DAY!",
-                desc: "오늘의 할 일 퍼펙트 클리어!<br>달콤한 성취감을 고스란히 안고 기분 좋게 하루를 마무리하세요!"
+        // Global State Definition
+        window.appState = {
+            todos: [],
+            schedules: [],
+            quote: "오늘 할 수 있는 일에 최선을 다하자!",
+            history: {},
+            currentFilter: '전체',
+            editingTodoId: null
+        };
+
+        // Error Alert Helpers (Defined at the top to avoid ReferenceError)
+        function hideErrorAlert() {
+            const box = document.getElementById('errorAlertBox');
+            if (box) {
+                box.style.display = 'none';
+                box.innerHTML = '';
             }
+        }
+
+        window.copyCurrentDomain = function() {
+            const input = document.getElementById('domainInput');
+            if (input) {
+                input.select();
+                document.execCommand('copy');
+                alert('현재 도메인이 복사되었습니다!\nFirebase Console > Authentication > Settings > Authorized domains 에 등록해주세요.');
+            }
+        };
+
+        function showErrorAlert(msg, isUnauthorizedDomain = false) {
+            const box = document.getElementById('errorAlertBox');
+            if (box) {
+                if (isUnauthorizedDomain) {
+                    const currentHostname = window.location.hostname;
+                    box.innerHTML = `
+                        <strong>🚨 로그인 오류: 승인되지 않은 도메인 (auth/unauthorized-domain)</strong><br>
+                        현재 실행 중인 주소(도메인)가 Firebase Console 승인 목록에 없습니다.<br><br>
+                        <strong>📌 해결 방법:</strong><br>
+                        1. <a href="https://console.firebase.google.com/" target="_blank" style="color: inherit; text-decoration: underline; font-weight: bold;">Firebase 콘솔</a> 접속<br>
+                        2. <strong>Authentication > Settings > Authorized domains</strong> 클릭<br>
+                        3. 아래 도메인을 <strong>[Add domain]</strong>으로 추가하세요:
+                        <div class="domain-copy-box">
+                            <input type="text" class="domain-copy-input" id="domainInput" value="${currentHostname}" readonly>
+                            <button class="btn-copy-domain" onclick="copyCurrentDomain()">복사</button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            💡 등록 전에는 아래 <strong>'로그인 없이 바로 시작하기 (연습 모드)'</strong> 버튼을 눌러 먼저 사용하실 수 있습니다.
+                        </div>
+                    `;
+                } else {
+                    box.innerText = msg;
+                }
+                box.style.display = 'block';
+            }
+        }
+
+        // Initialize Firebase
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (err) {
+            console.warn("Firebase Init Failed, falling back to practice mode:", err);
+            isPracticeMode = true;
+        }
+
+        // Global Auth Functions
+        window.firebaseLogin = async function() {
+            if (isPracticeMode) {
+                showErrorAlert("연습 모드 상태입니다. 로컬에 안전하게 저장 중입니다.");
+                return;
+            }
+            const provider = new GoogleAuthProvider();
+            try {
+                hideErrorAlert();
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                console.error("Login Failed:", err);
+                if (err.code === 'auth/unauthorized-domain') {
+                    showErrorAlert(err.message, true);
+                    // Automatically transition to practice mode so user is never blocked
+                    startPracticeMode();
+                } else {
+                    showErrorAlert("로그인 실패: [" + err.code + "] " + err.message);
+                }
+            }
+        };
+
+        window.firebaseLogout = async function() {
+            if (isPracticeMode) return;
+            try {
+                await signOut(auth);
+            } catch (err) {
+                console.error("Logout Error:", err);
+            }
+        };
+
+        // Firebase Auth State Listener
+        if (!isPracticeMode && auth) {
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                if (user) {
+                    hideErrorAlert();
+                    renderAuthBar(user);
+                    document.getElementById('appMainContent').style.display = 'block';
+                    document.getElementById('footerNotice').innerText = "내 할 일은 내 계정에만 저장되고 다른 사람은 볼 수 없습니다";
+                    await loadDataFromCloud();
+                } else {
+                    renderLoginScreen();
+                    document.getElementById('appMainContent').style.display = 'none';
+                }
+            });
+        } else {
+            // Default Fallback Practice Mode
+            isPracticeMode = true;
+            renderPracticeModeUI();
+            document.getElementById('appMainContent').style.display = 'block';
+            window.loadFromLocalStorage();
+        }
+
+        // Cloud Storage Debounce Logic (0.6 sec)
+        let saveTimeout = null;
+
+        window.triggerAutoSave = function() {
+            if (isPracticeMode || !currentUser) {
+                window.saveToLocalStorage();
+                return;
+            }
+
+            setSaveStatus("저장 중…");
+            if (saveTimeout) clearTimeout(saveTimeout);
+
+            saveTimeout = setTimeout(async () => {
+                try {
+                    // Strict Artifact Pathing Standard
+                    const userDocRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'data', 'todos');
+                    
+                    const payload = {
+                        items: window.appState.todos,
+                        schedule: window.appState.schedules,
+                        quote: window.appState.quote,
+                        history: window.appState.history || {},
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    await setDoc(userDocRef, payload, { merge: true });
+                    setSaveStatus("저장됨");
+                } catch (err) {
+                    console.error("Cloud Save Failed:", err);
+                    setSaveStatus("저장 실패 (로컬 보관)");
+                    window.saveToLocalStorage();
+                }
+            }, 600);
+        };
+
+        async function loadDataFromCloud() {
+            if (!currentUser) return;
+            try {
+                setSaveStatus("불러오는 중…");
+                const userDocRef = doc(db, 'artifacts', currentAppId, 'users', currentUser.uid, 'data', 'todos');
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.items) window.appState.todos = data.items;
+                    if (data.schedule) window.appState.schedules = data.schedule;
+                    if (data.quote) window.appState.quote = data.quote;
+                    if (data.history) window.appState.history = data.history;
+                }
+                setSaveStatus("저장됨");
+                window.renderAll();
+            } catch (err) {
+                console.error("Cloud Load Failed:", err);
+                showErrorAlert("클라우드 데이터 로딩 실패: 로컬 데이터를 사용합니다.");
+                window.loadFromLocalStorage();
+            }
+        }
+
+        function setSaveStatus(text) {
+            const el = document.getElementById('saveIndicator');
+            if (el) el.innerText = text;
+        }
+
+        function renderAuthBar(user) {
+            const authContainer = document.getElementById('authContainer');
+            authContainer.innerHTML = `
+                <div class="auth-bar">
+                    <div class="user-info">
+                        <img class="user-avatar" src="${user.photoURL || 'https://placehold.co/32x32/6366f1/ffffff?text=U'}" alt="profile" onerror="this.src='https://placehold.co/32x32/6366f1/ffffff?text=U'">
+                        <div>
+                            <span class="user-name">${user.displayName || '사용자'}</span>
+                            <span class="save-indicator" id="saveIndicator">저장됨</span>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="firebaseLogout()">로그아웃</button>
+                </div>
+            `;
+        }
+
+        function renderLoginScreen() {
+            const authContainer = document.getElementById('authContainer');
+            authContainer.innerHTML = `
+                <div class="login-screen">
+                    <div class="login-title">오늘 할 일 & 시간표</div>
+                    <div class="login-desc">구글 계정으로 로그인하여 나만의 할 일 목록과 시간표를 클라우드에 안전하게 저장해 보세요.</div>
+                    <button class="google-login-btn" onclick="firebaseLogin()">
+                        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                        구글 계정으로 로그인
+                    </button>
+                    <button class="logout-btn" style="margin-top: 4px; padding: 8px 16px; font-weight: 600;" onclick="startPracticeMode()">
+                        🔑 로그인 없이 바로 시작하기 (연습 모드)
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderPracticeModeUI() {
+            const authContainer = document.getElementById('authContainer');
+            authContainer.innerHTML = `
+                <div class="auth-bar" style="background-color: #fffbeb; border-color: #fde68a;">
+                    <div style="font-size: 0.82rem; color: #b45309; font-weight: 700;">
+                        ⚠️ 연습 모드 (로컬 저장 전용)
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="save-indicator" id="saveIndicator">로컬에 저장됨</span>
+                        <button class="logout-btn" style="font-size:0.7rem;" onclick="location.reload()">로그인 화면</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('footerNotice').innerText = "이 목록은 지금 쓰는 브라우저에만 저장됩니다 (연습 모드)";
+        }
+
+        window.startPracticeMode = function() {
+            isPracticeMode = true;
+            hideErrorAlert();
+            renderPracticeModeUI();
+            document.getElementById('appMainContent').style.display = 'block';
+            window.loadFromLocalStorage();
+        };
+
+        const CELEBRATION_MESSAGES = [
+            { title: "🎉 대단해요!", desc: "오늘의 모든 목표를 완벽하게 달성하셨습니다!" },
+            { title: "🔥 폭풍 성취!", desc: "막힘없는 실행력으로 할 일을 100% 끝내셨어요." },
+            { title: "⭐ 완벽한 하루!", desc: "오늘 계단 하나를 더 올라섰네요. 고생 많으셨습니다." },
+            { title: "👏 목표 올클리어!", desc: "오늘 계획했던 일들을 모두 마쳤습니다. 멋져요!" },
+            { title: "🚀 미션 성공!", desc: "오늘 하루도 승리하셨군요! 편안한 휴식을 즐기세요." },
+            { title: "🏆 오늘의 챔피언!", desc: "부지런한 노력으로 100% 달성률을 이뤄냈습니다." },
+            { title: "✨ 최고예요!", desc: "작은 실천들이 모여 큰 성취를 만들고 있습니다." },
+            { title: "💪 불가능은 없다!", desc: "할 일 목록을 전부 비워내셨네요. 수고하셨습니다." },
+            { title: "🌈 찬란한 결과!", desc: "보람찬 하루를 만들어낸 스스로를 칭찬해 주세요." },
+            { title: "💯 만점짜리 하루!", desc: "오늘 설정한 모든 리스트를 완벽하게 정복했습니다!" }
         ];
 
-        // App States
-        let todos = [];
-        let timetable = [];
-        let historyData = {}; // Format: { "YYYY-MM-DD": { total: N, completed: N } }
-        let currentFilter = 'ALL';
-        let isDarkMode = false;
         let weeklyChartInstance = null;
-        let currentQuote = "";
-        let isEditingQuote = false;
 
-        // DOM References
-        const currentDateEl = document.getElementById('currentDate');
-        const progressCountEl = document.getElementById('progressCount');
-        const progressBarEl = document.getElementById('progressBar');
-        const todoInput = document.getElementById('todoInput');
-        const categoryInput = document.getElementById('categoryInput');
-        const ddayInput = document.getElementById('ddayInput');
-        const todoListEl = document.getElementById('todoList');
-        const emptyMessageEl = document.getElementById('emptyMessage');
-        const toggleAllBtn = document.getElementById('toggleAllBtn');
-
-        const startTimeInput = document.getElementById('startTime');
-        const endTimeInput = document.getElementById('endTime');
-        const subjectInput = document.getElementById('subjectInput');
-        const timetableListEl = document.getElementById('timetableList');
-        const emptyTimetableMessageEl = document.getElementById('emptyTimetableMessage');
-
-        const quoteTextEl = document.getElementById('quoteText');
-        const quoteDisplayBoxEl = document.getElementById('quoteDisplayBox');
-        const quoteEditBtnEl = document.getElementById('quoteEditBtn');
-        const congratsModalEl = document.getElementById('congratsModal');
-
-        // 1. Date Format Helper
-        function getTodayString() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDate();
+            loadDarkMode();
+        });
 
         function renderDate() {
             const now = new Date();
@@ -1004,645 +1194,492 @@
             const date = now.getDate();
             const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
             const dayName = days[now.getDay()];
-
-            currentDateEl.textContent = `${year}년 ${month}월 ${date}일 ${dayName}`;
+            
+            document.getElementById('headerDate').innerText = `${year}년 ${month}월 ${date}일 ${dayName}`;
         }
 
-        // 2. Theme Manager
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            applyTheme();
-            localStorage.setItem(STORAGE_KEY_THEME, isDarkMode ? 'dark' : 'light');
-        }
+        // LocalStorage Helpers
+        window.saveToLocalStorage = function() {
+            localStorage.setItem('my_todo_app_state', JSON.stringify(window.appState));
+        };
 
-        function applyTheme() {
-            const themeBtn = document.getElementById('themeBtn');
-            if (isDarkMode) {
+        window.loadFromLocalStorage = function() {
+            const saved = localStorage.getItem('my_todo_app_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    window.appState.todos = parsed.todos || [];
+                    window.appState.schedules = parsed.schedules || [];
+                    window.appState.quote = parsed.quote || "오늘 할 수 있는 일에 최선을 다하자!";
+                    window.appState.history = parsed.history || {};
+                } catch(e) {
+                    console.error("Local storage load error:", e);
+                }
+            }
+            window.renderAll();
+        };
+
+        window.renderAll = function() {
+            renderQuote();
+            renderTodoList();
+            renderScheduleList();
+            updateProgressAndStats();
+        };
+
+        // Dark Mode Logic
+        window.toggleDarkMode = function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme_dark', isDark ? 'true' : 'false');
+            
+            document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+            document.getElementById('themeText').innerText = isDark ? '라이트모드' : '다크모드';
+        };
+
+        function loadDarkMode() {
+            const isDark = localStorage.getItem('theme_dark') === 'true';
+            if (isDark) {
                 document.body.classList.add('dark-mode');
-                themeBtn.textContent = '☀️ 라이트모드';
-            } else {
-                document.body.classList.remove('dark-mode');
-                themeBtn.textContent = '🌙 다크모드';
-            }
-            if (weeklyChartInstance) {
-                renderChart();
+                document.getElementById('themeIcon').innerText = '☀️';
+                document.getElementById('themeText').innerText = '라이트모드';
             }
         }
 
-        // 3. Tab Switch Manager
-        function switchTab(tabName) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            const contents = document.querySelectorAll('.tab-content');
+        // Quote Logic
+        function renderQuote() {
+            document.getElementById('quoteDisplay').innerText = `"${window.appState.quote}"`;
+        }
 
-            tabs.forEach(tab => tab.classList.remove('active'));
-            contents.forEach(content => content.classList.remove('active'));
+        window.editQuote = function() {
+            const newQuote = prompt("오늘의 다짐을 적어주세요:", window.appState.quote);
+            if (newQuote !== null && newQuote.trim() !== '') {
+                window.appState.quote = newQuote.trim();
+                renderQuote();
+                if (window.triggerAutoSave) window.triggerAutoSave();
+            }
+        };
+
+        // Tab Switch
+        window.switchTab = function(tabName) {
+            document.getElementById('tabTodo').classList.remove('active');
+            document.getElementById('tabSchedule').classList.remove('active');
+            document.getElementById('tabStats').classList.remove('active');
+
+            document.getElementById('tabBtnTodo').classList.remove('active');
+            document.getElementById('tabBtnSchedule').classList.remove('active');
+            document.getElementById('tabBtnStats').classList.remove('active');
 
             if (tabName === 'todo') {
-                tabs[0].classList.add('active');
-                document.getElementById('todoTab').classList.add('active');
-            } else if (tabName === 'timetable') {
-                tabs[1].classList.add('active');
-                document.getElementById('timetableTab').classList.add('active');
+                document.getElementById('tabTodo').classList.add('active');
+                document.getElementById('tabBtnTodo').classList.add('active');
+            } else if (tabName === 'schedule') {
+                document.getElementById('tabSchedule').classList.add('active');
+                document.getElementById('tabBtnSchedule').classList.add('active');
+                renderScheduleList();
             } else if (tabName === 'stats') {
-                tabs[2].classList.add('active');
-                document.getElementById('statsTab').classList.add('active');
-                updateStats();
+                document.getElementById('tabStats').classList.add('active');
+                document.getElementById('tabBtnStats').classList.add('active');
+                renderStats();
             }
-        }
+        };
 
-        // 4. LocalStorage Data Sync
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY_TODOS, JSON.stringify(todos));
-            localStorage.setItem(STORAGE_KEY_TIMETABLE, JSON.stringify(timetable));
+        // Filter Logic
+        window.setFilter = function(category, btnEl) {
+            window.appState.currentFilter = category;
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(c => c.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            renderTodoList();
+        };
 
-            // Sync Today's History Stats
-            const todayStr = getTodayString();
-            const total = todos.length;
-            const completed = todos.filter(t => t.completed).length;
+        // Todo CRUD Logic
+        window.addTodo = function() {
+            const textInput = document.getElementById('todoInput');
+            const catSelect = document.getElementById('todoCategorySelect');
+            const ddayInput = document.getElementById('todoDdayInput');
+
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            const newItem = {
+                id: Date.now().toString(),
+                text: text,
+                category: catSelect.value,
+                dday: ddayInput.value || null,
+                priority: false,
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+
+            window.appState.todos.unshift(newItem);
+            textInput.value = '';
+            ddayInput.value = '';
+
+            // Reset Filter to '전체' to ensure the newly added item is immediately visible
+            setFilter('전체', document.querySelectorAll('.filter-chip')[0]);
+
+            renderTodoList();
+            updateProgressAndStats();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
+
+        window.handleTodoKeyPress = function(e) {
+            if (e.key === 'Enter') addTodo();
+        };
+
+        window.toggleTodo = function(id) {
+            const previousCompletedCount = window.appState.todos.filter(t => t.completed).length;
             
-            historyData[todayStr] = { total, completed };
-            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(historyData));
-            localStorage.setItem(STORAGE_KEY_QUOTE, currentQuote);
-        }
+            const todo = window.appState.todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+            }
 
-        function loadData() {
-            try {
-                const savedTodos = localStorage.getItem(STORAGE_KEY_TODOS);
-                if (savedTodos) todos = JSON.parse(savedTodos);
+            renderTodoList();
+            const isCompletedNow = updateProgressAndStats();
 
-                const savedTimetable = localStorage.getItem(STORAGE_KEY_TIMETABLE);
-                if (savedTimetable) timetable = JSON.parse(savedTimetable);
+            // Trigger celebration if newly reached 100% completion
+            if (isCompletedNow && previousCompletedCount < window.appState.todos.length) {
+                triggerCelebrate();
+            }
 
-                const savedHistory = localStorage.getItem(STORAGE_KEY_HISTORY);
-                if (savedHistory) historyData = JSON.parse(savedHistory);
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
 
-                const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-                isDarkMode = savedTheme === 'dark';
+        window.togglePriority = function(id, event) {
+            event.stopPropagation();
+            const todo = window.appState.todos.find(t => t.id === id);
+            if (todo) {
+                todo.priority = !todo.priority;
+            }
+            renderTodoList();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
 
-                const savedQuote = localStorage.getItem(STORAGE_KEY_QUOTE);
-                if (savedQuote) {
-                    currentQuote = savedQuote;
-                } else {
-                    currentQuote = defaultQuotes[Math.floor(Math.random() * defaultQuotes.length)];
+        window.deleteTodo = function(id, event) {
+            event.stopPropagation();
+            window.appState.todos = window.appState.todos.filter(t => t.id !== id);
+            renderTodoList();
+            updateProgressAndStats();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
+
+        window.toggleSelectAll = function() {
+            if (window.appState.todos.length === 0) return;
+            const allCompleted = window.appState.todos.every(t => t.completed);
+            window.appState.todos.forEach(t => t.completed = !allCompleted);
+
+            renderTodoList();
+            const isCompletedNow = updateProgressAndStats();
+            if (isCompletedNow && !allCompleted) {
+                triggerCelebrate();
+            }
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
+
+        window.clearCompleted = function() {
+            window.appState.todos = window.appState.todos.filter(t => !t.completed);
+            renderTodoList();
+            updateProgressAndStats();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
+
+        // Edit Todo Modal Logic
+        window.openEditModal = function(id, event) {
+            event.stopPropagation();
+            const todo = window.appState.todos.find(t => t.id === id);
+            if (!todo) return;
+
+            window.appState.editingTodoId = id;
+            document.getElementById('editTodoInput').value = todo.text;
+            document.getElementById('editCategorySelect').value = todo.category || '개인';
+            document.getElementById('editModal').classList.add('active');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.remove('active');
+            window.appState.editingTodoId = null;
+        };
+
+        window.saveEditTodo = function() {
+            const id = window.appState.editingTodoId;
+            const newText = document.getElementById('editTodoInput').value.trim();
+            const newCat = document.getElementById('editCategorySelect').value;
+
+            if (newText && id) {
+                const todo = window.appState.todos.find(t => t.id === id);
+                if (todo) {
+                    todo.text = newText;
+                    todo.category = newCat;
                 }
-            } catch (e) {
-                console.error("Failed to load local storage data", e);
+                renderTodoList();
+                if (window.triggerAutoSave) window.triggerAutoSave();
             }
-        }
+            closeEditModal();
+        };
 
-        // 4-1. Quote & Resolution Manager
-        function renderQuote() {
-            if (isEditingQuote) {
-                quoteDisplayBoxEl.innerHTML = `<input type="text" id="quoteInput" class="quote-edit-input" value="${currentQuote}" maxlength="80">`;
-                const quoteInput = document.getElementById('quoteInput');
-                quoteInput.focus();
-                quoteInput.onkeydown = (e) => {
-                    if (e.key === 'Enter') saveQuote(quoteInput.value);
-                };
-                quoteInput.onblur = () => saveQuote(quoteInput.value);
-                quoteEditBtnEl.textContent = '💾';
-            } else {
-                quoteDisplayBoxEl.innerHTML = `<span class="quote-text" id="quoteText"></span>`;
-                document.getElementById('quoteText').textContent = currentQuote;
-                quoteEditBtnEl.textContent = '✏️';
-            }
-        }
-
-        function getRandomQuote() {
-            const randomIndex = Math.floor(Math.random() * defaultQuotes.length);
-            currentQuote = defaultQuotes[randomIndex];
-            isEditingQuote = false;
-            saveData();
-            renderQuote();
-        }
-
-        function toggleEditQuote() {
-            if (isEditingQuote) {
-                const quoteInput = document.getElementById('quoteInput');
-                if (quoteInput) saveQuote(quoteInput.value);
-            } else {
-                isEditingQuote = true;
-                renderQuote();
-            }
-        }
-
-        function saveQuote(newQuote) {
-            if (newQuote.trim()) {
-                currentQuote = newQuote.trim();
-            }
-            isEditingQuote = false;
-            saveData();
-            renderQuote();
-        }
-
-        // 5. D-Day Calculator
-        function calculateDDay(targetDateStr) {
-            if (!targetDateStr) return null;
+        // Calculate D-Day String
+        function getDdayString(targetDateStr) {
+            if (!targetDateStr) return '';
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
+            today.setHours(0,0,0,0);
+            
             const target = new Date(targetDateStr);
-            target.setHours(0, 0, 0, 0);
+            target.setHours(0,0,0,0);
 
             const diffTime = target - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays === 0) return { text: 'D-Day', class: 'urgent' };
-            if (diffDays > 0) return { text: `D-${diffDays}`, class: diffDays <= 3 ? 'urgent' : '' };
-            return { text: `D+${Math.abs(diffDays)}`, class: 'passed' };
+            if (diffDays === 0) return 'D-Day';
+            if (diffDays > 0) return `D-${diffDays}`;
+            return `D+${Math.abs(diffDays)}`;
         }
 
-        // 6. Todo Features
-        function setCategoryFilter(category) {
-            currentFilter = category;
-            const chips = document.querySelectorAll('.filter-chip');
-            chips.forEach(chip => {
-                if (chip.textContent.includes(category) || (category === 'ALL' && chip.textContent === '전체')) {
-                    chip.classList.add('active');
-                } else {
-                    chip.classList.remove('active');
-                }
-            });
-            renderTodos();
-        }
+        // Render Todo List Cards
+        function renderTodoList() {
+            const container = document.getElementById('todoList');
+            container.innerHTML = '';
 
-        function renderTodos() {
-            todoListEl.innerHTML = '';
+            // Filter
+            let filtered = window.appState.todos;
+            if (window.appState.currentFilter !== '전체') {
+                filtered = filtered.filter(t => t.category === window.appState.currentFilter);
+            }
 
-            // Priority High First, then uncompleted
-            const filtered = todos.filter(todo => {
-                if (currentFilter === 'ALL') return true;
-                return todo.category === currentFilter;
+            // Sort: Priority starred items on top, then incomplete first
+            filtered.sort((a, b) => {
+                if (a.priority !== b.priority) return b.priority ? 1 : -1;
+                return a.completed === b.completed ? 0 : a.completed ? 1 : -1;
             });
 
             if (filtered.length === 0) {
-                emptyMessageEl.style.display = 'block';
-            } else {
-                emptyMessageEl.style.display = 'none';
+                container.innerHTML = `
+                    <div class="empty-message">
+                        등록된 할 일이 없습니다.<br>새로운 목표를 등록해 보세요!
+                    </div>
+                `;
+                return;
             }
 
-            filtered.forEach((todo) => {
-                const realIndex = todos.indexOf(todo);
+            filtered.forEach(todo => {
+                const ddayStr = getDdayString(todo.dday);
 
-                const itemEl = document.createElement('div');
-                itemEl.className = `todo-item ${todo.completed ? 'completed' : ''} ${todo.isPriority ? 'priority-high' : ''}`;
-
-                const leftEl = document.createElement('div');
-                leftEl.className = 'todo-left';
-
-                // Checkbox
-                const checkboxEl = document.createElement('div');
-                checkboxEl.className = 'checkbox';
-                checkboxEl.onclick = () => toggleTodo(realIndex);
-
-                const contentBox = document.createElement('div');
-                contentBox.className = 'todo-content-box';
-
-                // Inline Edit or Render Text
-                if (todo.isEditing) {
-                    const editRow = document.createElement('div');
-                    editRow.style.display = 'flex';
-                    editRow.style.flexDirection = 'column';
-                    editRow.style.gap = '6px';
-                    editRow.style.width = '100%';
-
-                    const editInput = document.createElement('input');
-                    editInput.type = 'text';
-                    editInput.className = 'edit-input';
-                    editInput.value = todo.text;
-
-                    const categorySelect = document.createElement('select');
-                    categorySelect.className = 'select-input';
-                    categorySelect.style.padding = '4px 8px';
-                    categorySelect.style.fontSize = '0.8rem';
-                    
-                    const categories = ['공부', '운동', '업무', '개인'];
-                    categories.forEach(cat => {
-                        const opt = document.createElement('option');
-                        opt.value = cat;
-                        opt.textContent = (cat === '공부' ? '📚 공부' : cat === '운동' ? '🏋️ 운동' : cat === '업무' ? '💼 업무' : '🏠 개인');
-                        if (todo.category === cat) opt.selected = true;
-                        categorySelect.appendChild(opt);
-                    });
-
-                    editInput.onkeydown = (e) => {
-                        if (e.key === 'Enter') saveEditTodo(realIndex, editInput.value, categorySelect.value);
-                    };
-
-                    const saveBtn = document.createElement('button');
-                    saveBtn.className = 'add-btn';
-                    saveBtn.style.padding = '4px 10px';
-                    saveBtn.style.fontSize = '0.8rem';
-                    saveBtn.textContent = '저장';
-                    saveBtn.onclick = () => saveEditTodo(realIndex, editInput.value, categorySelect.value);
-
-                    const editActions = document.createElement('div');
-                    editActions.style.display = 'flex';
-                    editActions.style.gap = '6px';
-                    editActions.style.alignItems = 'center';
-                    editActions.appendChild(categorySelect);
-                    editActions.appendChild(saveBtn);
-
-                    editRow.appendChild(editInput);
-                    editRow.appendChild(editActions);
-                    contentBox.appendChild(editRow);
-                    setTimeout(() => editInput.focus(), 0);
-                } else {
-                    const textEl = document.createElement('span');
-                    textEl.className = 'todo-text';
-                    textEl.textContent = todo.text;
-                    textEl.onclick = () => toggleTodo(realIndex);
-                    contentBox.appendChild(textEl);
-                }
-
-                // Badges (Category & D-Day)
-                if (!todo.isEditing) {
-                    const badgeGroup = document.createElement('div');
-                    badgeGroup.className = 'badge-group';
-
-                    if (todo.category) {
-                        const tagBadge = document.createElement('span');
-                        tagBadge.className = 'tag-badge';
-                        tagBadge.textContent = todo.category;
-                        badgeGroup.appendChild(tagBadge);
-                    }
-
-                    const ddayInfo = calculateDDay(todo.dday);
-                    if (ddayInfo) {
-                        const ddayBadge = document.createElement('span');
-                        ddayBadge.className = `dday-badge ${ddayInfo.class}`;
-                        ddayBadge.textContent = ddayInfo.text;
-                        badgeGroup.appendChild(ddayBadge);
-                    }
-
-                    contentBox.appendChild(badgeGroup);
-                }
-
-                leftEl.appendChild(checkboxEl);
-                leftEl.appendChild(contentBox);
-
-                // Priority & Action Buttons
-                const actionEl = document.createElement('div');
-                actionEl.className = 'item-actions';
-
-                const starBtn = document.createElement('button');
-                starBtn.className = `star-btn ${todo.isPriority ? 'active' : ''}`;
-                starBtn.innerHTML = todo.isPriority ? '★' : '☆';
-                starBtn.title = '중요 설정';
-                starBtn.onclick = () => togglePriority(realIndex);
-                actionEl.appendChild(starBtn);
-
-                if (!todo.isEditing) {
-                    const editBtn = document.createElement('button');
-                    editBtn.className = 'icon-btn';
-                    editBtn.textContent = '수정';
-                    editBtn.onclick = () => startEditTodo(realIndex);
-                    actionEl.appendChild(editBtn);
-                }
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'icon-btn delete-btn';
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.title = '삭제';
-                deleteBtn.onclick = () => deleteTodo(realIndex);
-                actionEl.appendChild(deleteBtn);
-
-                itemEl.appendChild(leftEl);
-                itemEl.appendChild(actionEl);
-
-                todoListEl.appendChild(itemEl);
-            });
-
-            // Update Progress
-            const totalCount = todos.length;
-            const completedCount = todos.filter(t => t.completed).length;
-            const percentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
-
-            progressCountEl.textContent = `${completedCount} / ${totalCount} (${percentage}%)`;
-            progressBarEl.style.width = `${percentage}%`;
-
-            const allCompleted = totalCount > 0 && completedCount === totalCount;
-            toggleAllBtn.textContent = allCompleted ? '전체 해제' : '전체 완료';
-        }
-
-        function addTodo() {
-            const text = todoInput.value.trim();
-            if (!text) return;
-
-            const newCategory = categoryInput.value;
-
-            todos.push({
-                text: text,
-                category: newCategory,
-                dday: ddayInput.value || null,
-                completed: false,
-                isPriority: false,
-                isEditing: false
-            });
-
-            todoInput.value = '';
-            ddayInput.value = '';
-
-            // 만약 현재 선택된 필터가 추가하려는 카테고리가 아니거나 전체가 아니면 전체로 자동 전환하여 새로 추가된 항목이 확실히 보이도록 보장
-            if (currentFilter !== 'ALL' && currentFilter !== newCategory) {
-                currentFilter = 'ALL';
-                const chips = document.querySelectorAll('.filter-chip');
-                chips.forEach(chip => {
-                    if (chip.textContent === '전체') {
-                        chip.classList.add('active');
-                    } else {
-                        chip.classList.remove('active');
-                    }
-                });
-            }
-
-            saveData();
-            renderTodos();
-        }
-
-        function toggleTodo(index) {
-            const wasCompleted = todos[index].completed;
-            todos[index].completed = !wasCompleted;
-
-            // Trigger celebration confetti on 100% completion
-            const total = todos.length;
-            const completed = todos.filter(t => t.completed).length;
-            if (!wasCompleted && total > 0 && completed === total) {
-                triggerConfetti();
-            }
-
-            saveData();
-            renderTodos();
-        }
-
-        function togglePriority(index) {
-            todos[index].isPriority = !todos[index].isPriority;
-            // Sort priority items higher
-            todos.sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0));
-            saveData();
-            renderTodos();
-        }
-
-        function toggleAll() {
-            const allCompleted = todos.length > 0 && todos.every(t => t.completed);
-            todos.forEach(todo => todo.completed = !allCompleted);
-
-            if (!allCompleted && todos.length > 0) {
-                triggerConfetti();
-            }
-
-            saveData();
-            renderTodos();
-        }
-
-        function startEditTodo(index) {
-            todos[index].isEditing = true;
-            renderTodos();
-        }
-
-        function saveEditTodo(index, newText, newCategory) {
-            if (newText.trim()) {
-                todos[index].text = newText.trim();
-            }
-            if (newCategory) {
-                todos[index].category = newCategory;
-            }
-            todos[index].isEditing = false;
-            saveData();
-            renderTodos();
-        }
-
-        function deleteTodo(index) {
-            todos.splice(index, 1);
-            saveData();
-            renderTodos();
-        }
-
-        function clearCompleted() {
-            todos = todos.filter(t => !t.completed);
-            saveData();
-            renderTodos();
-        }
-
-        // 7. Confetti & Celebration Modal Manager
-        function triggerConfetti() {
-            if (typeof confetti === 'function') {
-                // 화려한 2단 폭죽 효과
-                confetti({
-                    particleCount: 100,
-                    spread: 80,
-                    origin: { y: 0.6 }
-                });
-
-                setTimeout(() => {
-                    confetti({
-                        particleCount: 50,
-                        angle: 60,
-                        spread: 55,
-                        origin: { x: 0 }
-                    });
-                    confetti({
-                        particleCount: 50,
-                        angle: 120,
-                        spread: 55,
-                        origin: { x: 1 }
-                    });
-                }, 250);
-            }
-            showCongratsModal();
-        }
-
-        function showCongratsModal() {
-            // 10개의 축하 메시지 중 랜덤으로 선택
-            const randomMsg = congratsMessages[Math.floor(Math.random() * congratsMessages.length)];
-            document.getElementById('congratsIcon').textContent = randomMsg.icon;
-            document.getElementById('congratsTitle').textContent = randomMsg.title;
-            document.getElementById('congratsDesc').innerHTML = randomMsg.desc;
-
-            congratsModalEl.classList.add('active');
-        }
-
-        function closeCongratsModal() {
-            congratsModalEl.classList.remove('active');
-        }
-
-        // 8. Timetable
-        function renderTimetable() {
-            timetableListEl.innerHTML = '';
-
-            if (timetable.length === 0) {
-                emptyTimetableMessageEl.style.display = 'block';
-            } else {
-                emptyTimetableMessageEl.style.display = 'none';
-            }
-
-            timetable.sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-            timetable.forEach((item, index) => {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'timetable-item';
-
-                const infoBox = document.createElement('div');
-
-                const timeRange = document.createElement('div');
-                timeRange.className = 'time-range';
-                timeRange.textContent = `${item.startTime} ~ ${item.endTime}`;
-
-                const subject = document.createElement('div');
-                subject.className = 'subject-name';
-                subject.textContent = item.subject;
-
-                infoBox.appendChild(timeRange);
-                infoBox.appendChild(subject);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'icon-btn delete-btn';
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.onclick = () => deleteTimetableItem(index);
-
-                itemEl.appendChild(infoBox);
-                itemEl.appendChild(deleteBtn);
-
-                timetableListEl.appendChild(itemEl);
+                const card = document.createElement('div');
+                card.className = `todo-card ${todo.completed ? 'completed' : ''}`;
+                card.innerHTML = `
+                    <div class="todo-left" onclick="toggleTodo('${todo.id}')">
+                        <div class="checkbox">
+                            ${todo.completed ? '✓' : ''}
+                        </div>
+                        <div class="todo-content">
+                            <div class="todo-title-row">
+                                <span class="priority-star ${todo.priority ? 'active' : ''}" onclick="togglePriority('${todo.id}', event)">
+                                    ${todo.priority ? '★' : '☆'}
+                                </span>
+                                <span class="todo-text">${escapeHtml(todo.text)}</span>
+                            </div>
+                            <div class="todo-meta">
+                                <span class="category-tag">${todo.category || '개인'}</span>
+                                ${ddayStr ? `<span class="dday-tag">${ddayStr}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="todo-actions">
+                        <button class="btn-card-action" onclick="openEditModal('${todo.id}', event)">수정</button>
+                        <button class="btn-card-action" onclick="deleteTodo('${todo.id}', event)">✕</button>
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
-        function addTimetableItem() {
-            const startTime = startTimeInput.value;
-            const endTime = endTimeInput.value;
-            const subject = subjectInput.value.trim();
+        // Timetable / Schedule Logic
+        window.addSchedule = function() {
+            const subject = document.getElementById('scheduleSubject').value.trim();
+            const start = document.getElementById('scheduleStartTime').value;
+            const end = document.getElementById('scheduleEndTime').value;
 
-            if (!subject) return;
+            if (!subject || !start || !end) {
+                alert("과목명과 시작/종료 시간을 모두 입력해 주세요.");
+                return;
+            }
 
-            timetable.push({ startTime, endTime, subject });
-            subjectInput.value = '';
-            saveData();
-            renderTimetable();
-        }
+            const newSchedule = {
+                id: Date.now().toString(),
+                subject: subject,
+                startTime: start,
+                endTime: end
+            };
 
-        function deleteTimetableItem(index) {
-            timetable.splice(index, 1);
-            saveData();
-            renderTimetable();
-        }
+            window.appState.schedules.push(newSchedule);
+            // Sort by start time
+            window.appState.schedules.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-        // 9. Statistics & Chart Engine
-        function updateStats() {
-            const totalCount = todos.length;
-            const completedCount = todos.filter(t => t.completed).length;
-            const todayRate = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+            document.getElementById('scheduleSubject').value = '';
+            document.getElementById('scheduleStartTime').value = '';
+            document.getElementById('scheduleEndTime').value = '';
 
-            document.getElementById('statTodayRate').textContent = `${todayRate}%`;
+            renderScheduleList();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
 
-            // Calculate Last 7 Days Avg
-            const dates = getLast7Days();
-            let totalRateSum = 0;
-            let daysRecorded = 0;
-            let grandTotalCompleted = 0;
+        window.handleScheduleKeyPress = function(e) {
+            if (e.key === 'Enter') addSchedule();
+        };
 
-            Object.values(historyData).forEach(item => {
-                grandTotalCompleted += (item.completed || 0);
+        window.deleteSchedule = function(id) {
+            window.appState.schedules = window.appState.schedules.filter(s => s.id !== id);
+            renderScheduleList();
+            if (window.triggerAutoSave) window.triggerAutoSave();
+        };
+
+        function renderScheduleList() {
+            const container = document.getElementById('timetableList');
+            container.innerHTML = '';
+
+            if (window.appState.schedules.length === 0) {
+                container.innerHTML = `<div class="empty-message">등록된 시간표 일정이 없습니다.</div>`;
+                return;
+            }
+
+            const now = new Date();
+            const currentHM = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            window.appState.schedules.forEach(item => {
+                const isActiveNow = (currentHM >= item.startTime && currentHM <= item.endTime);
+
+                const card = document.createElement('div');
+                card.className = `timetable-card ${isActiveNow ? 'active-now' : ''}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="timetable-time">${item.startTime} ~ ${item.endTime} ${isActiveNow ? '🟢 진행 중' : ''}</div>
+                        <div class="timetable-subject">${escapeHtml(item.subject)}</div>
+                    </div>
+                    <button class="btn-card-action" onclick="deleteSchedule('${item.id}')">✕</button>
+                `;
+                container.appendChild(card);
             });
-
-            dates.forEach(dateStr => {
-                const record = historyData[dateStr];
-                if (record && record.total > 0) {
-                    totalRateSum += (record.completed / record.total) * 100;
-                    daysRecorded++;
-                }
-            });
-
-            const weeklyAvg = daysRecorded === 0 ? 0 : Math.round(totalRateSum / daysRecorded);
-            document.getElementById('statWeeklyAvg').textContent = `${weeklyAvg}%`;
-            document.getElementById('statTotalCompleted').textContent = `${grandTotalCompleted}개`;
-
-            renderChart();
         }
 
-        function getLast7Days() {
-            const result = [];
+        // Progress & History Updates
+        function updateProgressAndStats() {
+            const total = window.appState.todos.length;
+            const completed = window.appState.todos.filter(t => t.completed).length;
+            const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            document.getElementById('progressCount').innerText = `${completed} / ${total} (${rate}%)`;
+            document.getElementById('progressBarFill').style.width = `${rate}%`;
+
+            // Record Today's Rate in History
+            const todayKey = new Date().toISOString().split('T')[0];
+            if (total > 0) {
+                window.appState.history[todayKey] = rate;
+            }
+
+            return total > 0 && rate === 100;
+        }
+
+        // Render Statistics Tab
+        function renderStats() {
+            const history = window.appState.history || {};
+            const todayKey = new Date().toISOString().split('T')[0];
+            
+            const todayRate = history[todayKey] !== undefined ? history[todayKey] : 0;
+            document.getElementById('statTodayRate').innerText = `${todayRate}%`;
+
+            // Calculate 7 Days Avg
+            const dates = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                result.push(`${year}-${month}-${day}`);
+                dates.push(d.toISOString().split('T')[0]);
             }
-            return result;
-        }
 
-        function renderChart() {
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            const dates = getLast7Days();
-            const labels = dates.map(d => d.slice(5)); // MM-DD
-            const rates = dates.map(d => {
-                const record = historyData[d];
-                if (!record || record.total === 0) return 0;
-                return Math.round((record.completed / record.total) * 100);
+            let sum = 0;
+            let count = 0;
+            const chartData = [];
+            const chartLabels = [];
+
+            dates.forEach(dStr => {
+                const val = history[dStr] || 0;
+                chartData.push(val);
+                chartLabels.push(dStr.slice(5)); // "MM-DD"
+                if (history[dStr] !== undefined) {
+                    sum += val;
+                    count++;
+                }
             });
 
+            const avg = count === 0 ? 0 : Math.round(sum / count);
+            document.getElementById('stat7DaysAvg').innerText = `${avg}%`;
+
+            const totalDone = window.appState.todos.filter(t => t.completed).length;
+            document.getElementById('statTotalDone').innerText = `${totalDone}개`;
+
+            // Render Chart
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
             if (weeklyChartInstance) {
                 weeklyChartInstance.destroy();
             }
 
-            const textColor = isDarkMode ? '#cbd5e1' : '#4b5563';
-            const gridColor = isDarkMode ? '#334155' : '#e5e7eb';
-
             weeklyChartInstance = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: chartLabels,
                     datasets: [{
                         label: '달성률 (%)',
-                        data: rates,
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4f46e5'
+                        data: chartData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100,
-                            ticks: { color: textColor, callback: value => value + '%' },
-                            grid: { color: gridColor }
-                        },
-                        x: {
-                            ticks: { color: textColor },
-                            grid: { color: gridColor }
+                            max: 100
                         }
-                    },
-                    plugins: {
-                        legend: { display: false }
                     }
                 }
             });
         }
 
-        // Event Listeners
-        todoInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTodo();
-        });
+        // Confetti Celebration
+        function triggerCelebrate() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
 
-        subjectInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addTimetableItem();
-        });
+            // Pick 1 of 10 Random Messages
+            const randomMsg = CELEBRATION_MESSAGES[Math.floor(Math.random() * CELEBRATION_MESSAGES.length)];
+            document.getElementById('modalTitle').innerText = randomMsg.title;
+            document.getElementById('modalDesc').innerText = randomMsg.desc;
+            
+            document.getElementById('customModal').classList.add('active');
+        }
 
-        // Initialize App
-        renderDate();
-        loadData();
-        applyTheme();
-        renderQuote();
-        renderTodos();
-        renderTimetable();
+        window.closeModal = function() {
+            document.getElementById('customModal').classList.remove('active');
+        };
+
+        // Utility: HTML Escaping
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
     </script>
 </body>
 </html>
