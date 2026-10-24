@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나를 소개합니다</title>
+    <style>
+        /* 기본 리셋 및 변수 정의 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-color: #fef2f2;
+            --text-color: #1e293b;
+            --header-bg: rgba(254, 226, 226, 0.85);
+            --header-title: #e11d48;
+            --header-sub: #4c0519;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: #fecdd3;
+            --card-hover-border: #fb7185;
+            --card-title: #be123c;
+            --card-content-bg: #fff1f2;
+            --card-content-border: #f43f5e;
+            --card-content-text: #475569;
+            --btn-bg: rgba(255, 255, 255, 0.9);
+            --btn-text: #e11d48;
+            --btn-border: #fca5a5;
+            --shadow-color: rgba(225, 29, 72, 0.12);
+            --player-silhouette: #fca5a5;
+            --player-accent: #be123c;
+        }
+
+        /* 다크모드 테마 변수 */
+        [data-theme="dark"] {
+            --bg-color: #18181b;
+            --text-color: #f4f4f5;
+            --header-bg: rgba(39, 39, 42, 0.85);
+            --header-title: #fda4af;
+            --header-sub: #fecdd3;
+            --card-bg: rgba(39, 39, 42, 0.85);
+            --card-border: #3f3f46;
+            --card-hover-border: #f43f5e;
+            --card-title: #f43f5e;
+            --card-content-bg: #18181b;
+            --card-content-border: #e11d48;
+            --card-content-text: #e4e4e7;
+            --btn-bg: #27272a;
+            --btn-text: #fda4af;
+            --btn-border: #52525b;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --player-silhouette: #3f3f46;
+            --player-accent: #f43f5e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            word-break: keep-all;
+            padding: 24px 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 전체 화면 고정 배경 축구선수 영역 */
+        .full-bg-player {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            max-width: 900px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.18;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .player-svg {
+            width: 90%;
+            height: 90%;
+            max-height: 800px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 상단 컨트롤러 (언어, 다크모드 버튼) */
+        .top-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .control-btn {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: 1px solid var(--btn-border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        /* 헤더 영역 */
+        header {
+            text-align: center;
+            padding: 32px 16px;
+            background: var(--header-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            margin-bottom: 24px;
+            transition: background 0.3s ease;
+            border: 1px solid var(--card-border);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--header-title);
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--header-sub);
+            font-weight: 600;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* 카드 스타일 */
+        .card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            border: 2px solid var(--card-border);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card:hover {
+            border-color: var(--card-hover-border);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px var(--shadow-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--card-title);
+        }
+
+        .arrow-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--card-title);
+            transition: transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        /* 접기/펼치기 콘텐츠 영역 */
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease, margin-top 0.3s ease;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .card-content p {
+            font-size: 1.1rem;
+            color: var(--card-content-text);
+            line-height: 1.6;
+            background-color: var(--card-content-bg);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 4px solid var(--card-content-border);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .card.active .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        .card.active .card-content {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 14px;
+            transition: max-height 0.3s ease-in, opacity 0.3s ease-in, margin-top 0.3s ease;
+        }
+
+        /* 방명록 섹션 스타일 */
+        .guestbook-section {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid var(--card-border);
+            margin-top: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .guestbook-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--card-title);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guestbook-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .guestbook-input, .guestbook-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background-color: var(--card-content-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .guestbook-input:focus, .guestbook-textarea:focus {
+            border-color: var(--card-hover-border);
+        }
+
+        .guestbook-textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .guestbook-submit {
+            align-self: flex-end;
+            background-color: var(--header-title);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .guestbook-submit:hover {
+            opacity: 0.9;
+        }
+
+        .guestbook-submit:active {
+            transform: scale(0.98);
+        }
+
+        .guestbook-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .guestbook-item {
+            background-color: var(--card-content-bg);
+            border-left: 4px solid var(--card-content-border);
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .guestbook-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--header-title);
+            font-weight: 700;
+        }
+
+        .guestbook-badge {
+            background-color: var(--card-content-border);
+            color: #ffffff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+
+        .guestbook-item-date {
+            font-size: 0.75rem;
+            color: var(--card-content-text);
+            opacity: 0.7;
+            font-weight: normal;
+        }
+
+        .guestbook-item-body {
+            font-size: 0.95rem;
+            color: var(--card-content-text);
+            word-break: break-all;
+        }
+
+        .empty-guestbook {
+            text-align: center;
+            color: var(--card-content-text);
+            opacity: 0.7;
+            font-size: 0.9rem;
+            padding: 16px 0;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            header p {
+                font-size: 1.1rem;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            .card-content p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 전체 바탕화면 배경 축구선수 SVG (등번호 9번, 땅볼 슈팅 동작) -->
+    <div class="full-bg-player">
+        <svg class="player-svg" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="playerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="var(--player-accent)" />
+                    <stop offset="100%" stop-color="var(--player-silhouette)" />
+                </linearGradient>
+            </defs>
+            
+            <!-- 지면 속도감 및 임팩트 효과 라인 -->
+            <path d="M 80 480 Q 250 470 520 480" stroke="var(--player-accent)" stroke-width="2" stroke-dasharray="10 6" opacity="0.4"/>
+            <path d="M 380 440 Q 450 435 520 430" stroke="var(--player-accent)" stroke-width="3" stroke-dasharray="8 4" opacity="0.6"/>
+
+            <!-- 축구공 (슈팅 임팩트 직후 강하게 날아가는 모습) -->
+            <g transform="translate(495, 422) rotate(15)">
+                <circle cx="0" cy="0" r="20" fill="#ffffff" stroke="var(--player-accent)" stroke-width="3"/>
+                <polygon points="0,-10 8,-3 5,8 -5,8 -8,-3" fill="var(--player-accent)"/>
+                <path d="M 0 -10 L 0 -20 M 8 -3 L 16 -6 M 5 8 L 12 14 M -5 8 L -12 14 M -8 -3 L -16 -6" stroke="var(--player-accent)" stroke-width="1.5"/>
+            </g>
+
+            <!-- 정교한 전신 축구선수 슈팅 실루엣 -->
+            <!-- 머리 및 헤어라인 -->
+            <circle cx="280" cy="115" r="22" fill="url(#playerGrad)"/>
+            <path d="M 265 102 C 275 92 295 95 300 108" stroke="var(--player-accent)" stroke-width="4" fill="none"/>
+
+            <!-- 상체 유니폼 -->
+            <path d="M 275 137 L 230 165 L 245 270 L 315 265 L 325 160 Z" fill="url(#playerGrad)"/>
+
+            <!-- 왼팔 -->
+            <path d="M 235 165 L 180 195 L 140 230" fill="none" stroke="url(#playerGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="140" cy="230" r="8" fill="url(#playerGrad)"/>
+
+            <!-- 오른팔 -->
+            <path d="M 320 165 L 375 185 L 420 215" fill="none" stroke="url(#playerGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="420" cy="215" r="8" fill="url(#playerGrad)"/>
+
+            <!-- 등번호 9번 -->
+            <g transform="translate(280, 205) rotate(-5) scale(1.1)">
+                <text x="0" y="0" font-family="'Impact', 'Arial Black', sans-serif" font-size="44" font-weight="900" fill="#ffffff" text-anchor="middle" dominant-baseline="central" stroke="var(--player-accent)" stroke-width="1.5">9</text>
+            </g>
+
+            <!-- 반바지 -->
+            <path d="M 245 270 L 225 340 L 275 345 L 285 270 Z" fill="url(#playerGrad)"/>
+            <path d="M 285 270 L 285 345 L 335 335 L 315 265 Z" fill="url(#playerGrad)"/>
+
+            <!-- 왼다리 (디딤발) -->
+            <path d="M 245 340 L 260 400" stroke="url(#playerGrad)" stroke-width="26" stroke-linecap="round"/>
+            <path d="M 260 400 L 278 458" stroke="url(#playerGrad)" stroke-width="20" stroke-linecap="round"/>
+            
+            <!-- 리얼한 디딤발 축구화 (발목 해부학적 구조 반영 및 축구화 힐컵, 텅, 스터드) -->
+            <g transform="translate(278, 458)">
+                <!-- 발목 연결 및 뒤꿈치 -->
+                <path d="M -10 -8 L 8 -5 L 18 10 L 24 16 L -12 18 Z" fill="var(--player-accent)"/>
+                <!-- 축구화 바디 (아치 및 신발 앞코) -->
+                <path d="M -12 10 Q 0 12 28 12 Q 35 13 36 18 L -14 18 Z" fill="url(#playerGrad)"/>
+                <!-- 축구화 끈 / 신발 덮개 라인 디테일 -->
+                <path d="M 2 5 L 18 10" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+                <path d="M 6 2 L 20 7" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+                <!-- 밑창 및 스터드 (땅에 강하게 디딘 징) -->
+                <rect x="-10" y="18" width="28" height="3" fill="var(--player-accent)"/>
+                <polygon points="-8,21 -6,26 -2,26 -4,21" fill="#ffffff"/>
+                <polygon points="6,21 8,26 12,26 10,21" fill="#ffffff"/>
+                <polygon points="18,21 20,26 24,26 22,21" fill="#ffffff"/>
+            </g>
+
+            <!-- 오른다리 (슈팅하는 다리) -->
+            <path d="M 310 335 L 370 375" stroke="url(#playerGrad)" stroke-width="26" stroke-linecap="round"/>
+            <path d="M 370 375 L 442 410" stroke="url(#playerGrad)" stroke-width="20" stroke-linecap="round"/>
+            
+            <!-- 리얼한 슈팅발 축구화 (인스텝 슈팅 각도로 고정된 발목과 밀착된 축구화 실루엣) -->
+            <g transform="translate(442, 410) rotate(22)">
+                <!-- 발목과 발등 곡선 -->
+                <path d="M -8 -10 Q 8 -2 22 2 L 34 8 Q 38 12 36 15 L -10 10 Z" fill="url(#playerGrad)"/>
+                <!-- 축구화 아웃솔/가죽 갑피 구조 -->
+                <path d="M -8 2 L 36 10 L 32 16 L -10 10 Z" fill="var(--player-accent)"/>
+                <!-- 축구화 삼선/악센트 줄무늬 -->
+                <path d="M 4 0 L 10 12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+                <path d="M 10 2 L 16 13" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+                <!-- 발가락 끝 고정된 폼 -->
+                <path d="M 32 8 C 38 10 40 13 36 16 L 32 16 Z" fill="#ffffff"/>
+                <!-- 밑창 스터드 -->
+                <circle cx="-2" cy="12" r="2" fill="#ffffff"/>
+                <circle cx="12" cy="14" r="2" fill="#ffffff"/>
+                <circle cx="24" cy="15" r="2" fill="#ffffff"/>
+            </g>
+        </svg>
+    </div>
+
+    <div class="container">
+        <!-- 컨트롤 버튼 (다크모드 & 언어 전환) -->
+        <div class="top-controls">
+            <button class="control-btn" id="lang-btn" onclick="toggleLanguage()">English</button>
+            <button class="control-btn" id="theme-btn" onclick="toggleTheme()">🌙 다크모드</button>
+        </div>
+
+        <!-- 헤더 영역 -->
+        <header>
+            <h1 id="header-title">✨ 호기심 많은 탐험가</h1>
+            <p id="header-sub">매일 새로운 것을 배우고 경험하는 것을 좋아합니다!</p>
+        </header>
+
+        <!-- 세 가지 카드 영역 -->
+        <main>
+            <!-- 카드 1: 좋아하는 것 -->
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-header">
+                    <span class="card-title" id="card1-title">❤️ 좋아하는 것</span>
+                    <span class="arrow-icon">▼</span>
+                </div>
+                <div class="card-content">
+                    <p id="card1-desc">조용한 공간에서 책을 읽는 순간, 선선한 바람을 맞으며 걷는 산책, 그리고 에너지를 발산할 수 있는 축구하기를 좋아해요.</p>
+                </div>
+            </div>
+
+            <!-- 카드 2: 요즘 관심사 -->
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-header">
+                    <span class="card-title" id="card2-title">⚽ 요즘 관심사</span>
+                    <span class="arrow-icon">▼</span>
+                </div>
+                <div class="card-content">
+                    <p id="card2-desc">요즘 가장 몰입하고 있는 건 축구예요! 전술을 연구하고 하이라이트 경기를 보거나 직접 뛰는 것 모두 좋아합니다.</p>
+                </div>
+            </div>
+
+            <!-- 카드 3: 올해 해 보고 싶은 것 -->
+            <div class="card" onclick="toggleCard(this)">
+                <div class="card-header">
+                    <span class="card-title" id="card3-title">🚀 올해 해 보고 싶은 것</span>
+                    <span class="arrow-icon">▼</span>
+                </div>
+                <div class="card-content">
+                    <p id="card3-desc">해트트릭! 한 경기 3골</p>
+                </div>
+            </div>
+
+            <!-- 방명록 영역 -->
+            <section class="guestbook-section">
+                <div class="guestbook-title" id="gb-title">💬 방명록</div>
+                <form class="guestbook-form" onsubmit="addGuestbookEntry(event)">
+                    <input type="text" id="gb-name" class="guestbook-input" placeholder="이름 (닉네임)" required maxlength="20">
+                    <textarea id="gb-message" class="guestbook-textarea" placeholder="소감을 남겨주세요!" required maxlength="150"></textarea>
+                    <button type="submit" class="guestbook-submit" id="gb-submit-btn">남기기</button>
+                </form>
+                <div class="guestbook-list" id="gb-list">
+                    <!-- 방명록 목록이 여기에 dynamic하게 생성됨 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 현재 상태 변수
+        let currentLang = 'ko';
+        let isDarkMode = false;
+        let guestbookEntries = [
+            { name: "축구왕", message: "올해 꼭 해트트릭 성공하시길 응원합니다! ⚽", date: "2026.03.28", isExample: true },
+            { name: "산책러", message: "프로필 페이지 디자인이 시원하고 멋지네요!", date: "2026.03.28", isExample: true }
+        ];
+
+        // 언어별 텍스트 데이터
+        const translations = {
+            ko: {
+                themeDark: "🌙 다크모드",
+                themeLight: "☀️ 라이트모드",
+                langBtn: "English",
+                headerTitle: "✨ 호기심 많은 탐험가",
+                headerSub: "매일 새로운 것을 배우고 경험하는 것을 좋아합니다!",
+                card1Title: "❤️ 좋아하는 것",
+                card1Desc: "조용한 공간에서 책을 읽는 순간, 선선한 바람을 맞으며 걷는 산책, 그리고 에너지를 발산할 수 있는 축구하기를 좋아해요.",
+                card2Title: "⚽ 요즘 관심사",
+                card2Desc: "요즘 가장 몰입하고 있는 건 축구예요! 전술을 연구하고 하이라이트 경기를 보거나 직접 뛰는 것 모두 좋아합니다.",
+                card3Title: "🚀 올해 해 보고 싶은 것",
+                card3Desc: "해트트릭! 한 경기 3골",
+                gbTitle: "💬 방명록",
+                gbNamePlaceholder: "이름 (닉네임)",
+                gbMsgPlaceholder: "소감을 남겨주세요!",
+                gbSubmit: "남기기",
+                gbEmpty: "첫 방명록을 작성해 보세요!",
+                exampleBadge: "예시"
+            },
+            en: {
+                themeDark: "🌙 Dark Mode",
+                themeLight: "☀️ Light Mode",
+                langBtn: "한국어",
+                headerTitle: "✨ Curious Explorer",
+                headerSub: "I love learning and experiencing new things every day!",
+                card1Title: "❤️ Favorite Things",
+                card1Desc: "Reading books in a quiet space, walking in the cool breeze, and playing soccer to release energy.",
+                card2Title: "⚽ Current Interest",
+                card2Desc: "I'm most into soccer these days! I enjoy studying tactics, watching match highlights, and playing.",
+                card3Title: "🚀 Goal for This Year",
+                card3Desc: "Hat-trick! 3 goals per match",
+                gbTitle: "💬 Guestbook",
+                gbNamePlaceholder: "Name (Nickname)",
+                gbMsgPlaceholder: "Leave your message here!",
+                gbSubmit: "Submit",
+                gbEmpty: "Be the first to leave a message!",
+                exampleBadge: "Example"
+            }
+        };
+
+        /**
+         * 카드를 클릭했을 때 펼쳐짐/접힘 상태를 토글하는 함수
+         */
+        function toggleCard(element) {
+            element.classList.toggle('active');
+        }
+
+        /**
+         * 다크모드 / 라이트모드 토글 함수
+         */
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const themeBtn = document.getElementById('theme-btn');
+
+            if (isDarkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeBtn.textContent = translations[currentLang].themeLight;
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                themeBtn.textContent = translations[currentLang].themeDark;
+            }
+        }
+
+        /**
+         * 언어 전환 (한국어 ↔ English) 함수
+         */
+        function toggleLanguage() {
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            const data = translations[currentLang];
+
+            // 텍스트 업데이트
+            document.getElementById('lang-btn').textContent = data.langBtn;
+            document.getElementById('theme-btn').textContent = isDarkMode ? data.themeLight : data.themeDark;
+            document.getElementById('header-title').textContent = data.headerTitle;
+            document.getElementById('header-sub').textContent = data.headerSub;
+            document.getElementById('card1-title').textContent = data.card1Title;
+            document.getElementById('card1-desc').textContent = data.card1Desc;
+            document.getElementById('card2-title').textContent = data.card2Title;
+            document.getElementById('card2-desc').textContent = data.card2Desc;
+            document.getElementById('card3-title').textContent = data.card3Title;
+            document.getElementById('card3-desc').textContent = data.card3Desc;
+
+            // 방명록 UI 텍스트 업데이트
+            document.getElementById('gb-title').textContent = data.gbTitle;
+            document.getElementById('gb-name').placeholder = data.gbNamePlaceholder;
+            document.getElementById('gb-message').placeholder = data.gbMsgPlaceholder;
+            document.getElementById('gb-submit-btn').textContent = data.gbSubmit;
+
+            renderGuestbook();
+        }
+
+        /**
+         * 방명록 추가 함수
+         */
+        function addGuestbookEntry(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('gb-name');
+            const messageInput = document.getElementById('gb-message');
+
+            const name = nameInput.value.trim();
+            const message = messageInput.value.trim();
+
+            if (!name || !message) return;
+
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+
+            guestbookEntries.unshift({ name, message, date: dateStr });
+
+            nameInput.value = '';
+            messageInput.value = '';
+
+            renderGuestbook();
+        }
+
+        /**
+         * 방명록 목록 랜더링 함수
+         */
+        function renderGuestbook() {
+            const listEl = document.getElementById('gb-list');
+            listEl.innerHTML = '';
+
+            if (guestbookEntries.length === 0) {
+                listEl.innerHTML = `<div class="empty-guestbook">${translations[currentLang].gbEmpty}</div>`;
+                return;
+            }
+
+            guestbookEntries.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'guestbook-item';
+                
+                const badgeHtml = entry.isExample ? `<span class="guestbook-badge">${translations[currentLang].exampleBadge}</span>` : '';
+                
+                item.innerHTML = `
+                    <div class="guestbook-item-header">
+                        <div>
+                            <span>${escapeHtml(entry.name)}</span>
+                            ${badgeHtml}
+                        </div>
+                        <span class="guestbook-item-date">${entry.date}</span>
+                    </div>
+                    <div class="guestbook-item-body">${escapeHtml(entry.message)}</div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        /**
+         * XSS 방지를 위한 HTML 이스케이프 함수
+         */
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        // 초기 랜더링
+        window.onload = function() {
+            renderGuestbook();
+        };
+    </script>
+</body>
+</html>
