@@ -39,6 +39,10 @@
         <div class="text-center">
             <div class="text-xs text-slate-400 font-bold">현재 점수</div>
             <div id="scoreDisplay" class="text-2xl sm:text-3xl font-extrabold text-green-400 tracking-wider">0</div>
+            <!-- 최고 점수 및 TOP 3 표시 영역 -->
+            <div class="text-[11px] text-amber-300 font-semibold mt-0.5">
+                🥇 1위: <span id="top1Display">0</span> | 🥈 2위: <span id="top2Display">0</span> | 🥉 3위: <span id="top3Display">0</span>
+            </div>
         </div>
     </header>
 
@@ -87,6 +91,11 @@
             <span>⚽ SHOOT!</span>
             <span class="text-xs font-normal opacity-80">(스페이스바)</span>
         </button>
+
+        <!-- 저장 안내 문구 -->
+        <div class="text-center text-[11px] text-slate-400 mt-1">
+            기록은 이 브라우저에만 저장됩니다
+        </div>
     </footer>
 
     <!-- 게임 종료 모달 -->
@@ -94,11 +103,34 @@
         <div class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
             <h2 class="text-3xl font-black text-amber-400 mb-2">TIME UP!</h2>
             <p class="text-slate-300 text-sm mb-4">3분간의 경기 기록</p>
-            <div class="bg-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
+            <div class="bg-slate-900 rounded-xl p-4 mb-4 border border-slate-700">
                 <div class="text-slate-400 text-xs mb-1">최종 점수</div>
                 <div id="finalScore" class="text-5xl font-black text-green-400">0</div>
             </div>
-            <button onclick="location.reload()" class="btn-active w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-lg shadow-lg">
+
+            <!-- 모달 내 최고 점수 및 새 기록 알림 -->
+            <div id="newRecordBadge" class="hidden bg-amber-500 text-slate-950 font-black text-xs py-1 px-3 rounded-full mb-3 animate-bounce inline-block">
+                🎉 TOP 3 신기록 달성!
+            </div>
+            
+            <!-- TOP 3 랭킹판 -->
+            <div class="bg-slate-900/80 rounded-xl p-3 mb-4 border border-slate-700 text-xs">
+                <div class="font-bold text-amber-400 mb-2">🏆 명예의 전당 (TOP 3)</div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-800">
+                    <span class="text-slate-400">1위 🥇</span>
+                    <span id="modalTop1" class="font-bold text-amber-300">0점</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-800">
+                    <span class="text-slate-400">2위 🥈</span>
+                    <span id="modalTop2" class="font-bold text-slate-300">0점</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-400">3위 🥉</span>
+                    <span id="modalTop3" class="font-bold text-amber-600">0점</span>
+                </div>
+            </div>
+
+            <button onclick="resetGameSession()" class="btn-active w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-lg shadow-lg">
                 다시 도전하기
             </button>
         </div>
@@ -107,6 +139,85 @@
     <script>
         // 필수 규격
         const GAME_ID = 'my-game';
+
+        // ==========================================
+        // [점수 저장 및 TOP 3 랭킹 전용 영역]
+        // ==========================================
+        
+        // 미리보기 차단 환경을 대비한 인메모리 기록 저장소
+        let memoryScores = [0, 0, 0];
+
+        // TOP 3 저장된 점수를 읽어오는 함수
+        function loadScores() {
+            try {
+                const saved = localStorage.getItem('topScores_' + GAME_ID);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        memoryScores = parsed.slice(0, 3);
+                    }
+                }
+            } catch (e) {
+                console.warn('LocalStorage 제한으로 메모리 저장소 사용:', e);
+            }
+            return memoryScores;
+        }
+
+        // 최고 점수 반환 (loadBest 규격 준수)
+        function loadBest() {
+            const scores = loadScores();
+            return scores[0] || 0;
+        }
+
+        // 점수를 저장하고 TOP 3를 업데이트하는 함수
+        function saveScore(newScore) {
+            let scores = loadScores();
+            
+            // 새 점수 추가 후 내림차순 정렬
+            scores.push(parseInt(newScore, 10));
+            scores.sort((a, b) => b - a);
+            scores = scores.slice(0, 3); // 상위 3개만 유지
+            memoryScores = scores;
+
+            // 로컬스토리지 저장 시도
+            try {
+                localStorage.setItem('topScores_' + GAME_ID, JSON.stringify(scores));
+                localStorage.setItem('best_' + GAME_ID, scores[0].toString());
+            } catch (e) {
+                console.warn('LocalStorage 저장 제한:', e);
+            }
+
+            updateBestScoreUI(scores);
+            return scores.includes(parseInt(newScore, 10)) && newScore > 0; // TOP 3에 진입했는지 여부
+        }
+
+        // 화면 상단 및 모달의 TOP 3 점수 UI 업데이트
+        function updateBestScoreUI(scores) {
+            const list = scores || loadScores();
+            const t1 = list[0] || 0;
+            const t2 = list[1] || 0;
+            const t3 = list[2] || 0;
+
+            // 상단 전광판
+            if (document.getElementById('top1Display')) document.getElementById('top1Display').innerText = t1;
+            if (document.getElementById('top2Display')) document.getElementById('top2Display').innerText = t2;
+            if (document.getElementById('top3Display')) document.getElementById('top3Display').innerText = t3;
+            
+            // 결과 모달
+            if (document.getElementById('modalTop1')) document.getElementById('modalTop1').innerText = `${t1}점`;
+            if (document.getElementById('modalTop2')) document.getElementById('modalTop2').innerText = `${t2}점`;
+            if (document.getElementById('modalTop3')) document.getElementById('modalTop3').innerText = `${t3}점`;
+        }
+
+        // 페이지 로드 시 최초 1회 저장된 점수를 불러와 UI에 표시
+        function initScoreData() {
+            const scores = loadScores();
+            updateBestScoreUI(scores);
+        }
+
+        // ==========================================
+        // [점수 저장 기능 영역 끝]
+        // ==========================================
 
         // Web Audio API 효과음 생성기
         const AudioFX = {
@@ -694,12 +805,39 @@
 
         function gameOver(finalScore) {
             isGameOver = true;
+
+            // 최고 점수 및 TOP 3 저장 실행
+            const isTopRank = saveScore(finalScore);
+
             document.getElementById('finalScore').innerText = finalScore;
+
+            const newRecordBadge = document.getElementById('newRecordBadge');
+            if (isTopRank) {
+                newRecordBadge.classList.remove('hidden');
+            } else {
+                newRecordBadge.classList.add('hidden');
+            }
+
             document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        // 재시작 함수 (페이지 새로고침 대신 세션 리셋)
+        function resetGameSession() {
+            document.getElementById('gameOverModal').classList.add('hidden');
+            timeLeft = 180;
+            score = 0;
+            combo = 0;
+            isGameOver = false;
+            document.getElementById('scoreDisplay').innerText = '0';
+            resetBallPosition();
+            clearInterval(timerInterval);
+            startTimer();
+            requestAnimationFrame(gameLoop);
         }
 
         // 게임 시작
         window.onload = () => {
+            initScoreData(); // 저장된 점수 및 TOP 3 불러오기
             resetBallPosition();
             startTimer();
             requestAnimationFrame(gameLoop);
